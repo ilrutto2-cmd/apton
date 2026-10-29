@@ -1,0 +1,24 @@
+# 한 대의 서버에서 데이터베이스와 함께 실행: docker compose up -d
+# 실행 전 .env 파일을 만들고 값을 채우세요(.env.example 참고). HTTPS는 앞단 프록시(Caddy 등)로 붙이세요.
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: apton
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD를 .env에 설정하세요}
+      POSTGRES_DB: apton
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on: [db]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://apton:${DB_PASSWORD}@db:5432/apton
+      SCHEDULER: internal
+    ports:
+      - "3000:3000"
+volumes:
+  dbdata:

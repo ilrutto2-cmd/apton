@@ -1,26 +1,89 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  --color-brand-50: #eef5ff;
+  --color-brand-100: #d9e8ff;
+  --color-brand-200: #b6d3ff;
+  --color-brand-500: #2f6fed;
+  --color-brand-600: #1f5ad6;
+  --color-brand-700: #1847ab;
+  --color-ink: #16202e;
+  --color-sub: #4f5d70;
+  --color-line: #dfe5ee;
+  --color-canvas: #f4f7fb;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html {
+  font-size: 17px;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  word-break: keep-all;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line bg-white;
+  }
+  .btn {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-[1rem] font-semibold transition select-none disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-[1rem] font-semibold transition select-none disabled:cursor-not-allowed disabled:opacity-50 bg-brand-500 text-white hover:bg-brand-600 active:bg-brand-700;
+  }
+  .btn-secondary {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-[1rem] font-semibold transition select-none disabled:cursor-not-allowed disabled:opacity-50 border border-line bg-white text-ink hover:bg-slate-50;
+  }
+  .btn-danger {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-[1rem] font-semibold transition select-none disabled:cursor-not-allowed disabled:opacity-50 bg-red-600 text-white hover:bg-red-700;
+  }
+  .btn-ghost {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-xl px-3 text-[1rem] font-semibold text-sub transition select-none hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-sm {
+    @apply min-h-9 rounded-lg px-3 text-sm;
+  }
+  .input {
+    @apply block w-full min-h-12 rounded-xl border border-line bg-white px-4 text-[1rem] text-ink placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 focus:outline-none;
+  }
+  textarea.input {
+    @apply py-3 leading-relaxed;
+  }
+  .label {
+    @apply mb-1.5 block text-[0.95rem] font-semibold text-ink;
+  }
+  .hint {
+    @apply mt-1 text-sm text-sub;
+  }
+  .chip {
+    @apply inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-xl border border-line bg-white px-4 text-[0.95rem] font-medium text-ink transition hover:border-brand-200 hover:bg-brand-50;
+  }
+  .chip-on {
+    @apply border-brand-500 bg-brand-50 text-brand-700 ring-2 ring-brand-100;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[0.8rem] font-semibold whitespace-nowrap;
+  }
+  .table-base {
+    @apply w-full text-left text-[0.95rem];
+  }
+  .table-base th {
+    @apply border-b border-line bg-slate-50 px-3 py-2.5 text-sm font-semibold text-sub;
+  }
+  .table-base td {
+    @apply border-b border-line px-3 py-3 align-middle;
+  }
+  .section-title {
+    @apply text-lg font-bold text-ink;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+:focus-visible {
+  outline: 3px solid var(--color-brand-200);
+  outline-offset: 2px;
 }
