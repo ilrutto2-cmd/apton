@@ -132,6 +132,7 @@ async function runClaimedDispatch(dispatchId: string) {
   if (existing[0].n === 0) {
     const summary = await resolveRecipients(apt.id, notice.target, {
       includeSample: d.mode === "test",
+      excludeAppUsers: notice.excludeAppUsers && !notice.isEmergency,
       onlyPhoneHashes: d.onlyPhoneHashes,
     });
     if (!summary.recipients.length) return failDispatch(d.id, "발송 시점에 문자를 받을 수 있는 수신자가 없습니다.");

@@ -22,6 +22,7 @@ export type Preview = {
   excludedNoConsent: number;
   excludedInactive: number;
   excludedSample: number;
+  excludedAppUsers: number;
   duplicatesMerged: number;
   bytes: number;
   type: "SMS" | "LMS";
@@ -49,8 +50,8 @@ export async function previewAction(raw: unknown): Promise<Preview | { error: st
   const mode = apt.smsMode === "live" ? "live" : "test";
   const label = target ? await targetLabel(apt.id, target) : "";
   const summary = target
-    ? await resolveRecipients(apt.id, target, { includeSample: mode === "test" })
-    : { recipients: [], totalContacts: 0, excludedNoConsent: 0, excludedInactive: 0, excludedSample: 0, duplicatesMerged: 0, unitCount: 0 };
+    ? await resolveRecipients(apt.id, target, { includeSample: mode === "test", excludeAppUsers: i.excludeAppUsers && !(i.isEmergency || i.category === "emergency") })
+    : { recipients: [], totalContacts: 0, excludedNoConsent: 0, excludedInactive: 0, excludedSample: 0, excludedAppUsers: 0, duplicatesMerged: 0, unitCount: 0 };
   const { startsAt } = parseSchedule(i);
   const plan = planSends({ ...i, method: i.method === "draft" ? "now" : i.method }, startsAt);
   const sampleText = finalText({ prefix: "", smsText: i.smsText, includeLink: i.includeLink, visibility: i.visibility, slug: apt.publicSlug, noticeId: i.noticeId ?? "00000000-0000-0000-0000-000000000000" });
@@ -68,6 +69,7 @@ export async function previewAction(raw: unknown): Promise<Preview | { error: st
     excludedNoConsent: summary.excludedNoConsent,
     excludedInactive: summary.excludedInactive,
     excludedSample: summary.excludedSample,
+    excludedAppUsers: summary.excludedAppUsers,
     duplicatesMerged: summary.duplicatesMerged,
     bytes: smsBytes(sampleText),
     type,
@@ -118,7 +120,7 @@ export async function submitNoticeAction(raw: unknown): Promise<SubmitResult> {
   const longest = (plan.sends.length > 1 ? "(재안내)\n" : "") + finalText({ prefix: "", smsText: i.smsText, includeLink: i.includeLink, visibility: i.visibility, slug: apt.publicSlug, noticeId: i.noticeId ?? "00000000-0000-0000-0000-000000000000" });
   if (smsBytes(longest) > LMS_MAX_BYTES) return { error: `문자가 너무 깁니다(${smsBytes(longest)}바이트). ${LMS_MAX_BYTES}바이트 이내로 줄여 주세요.` };
   if (i.method !== "draft") {
-    const s = await resolveRecipients(apt.id, target, { includeSample: apt.smsMode !== "live" });
+    const s = await resolveRecipients(apt.id, target, { includeSample: apt.smsMode !== "live", excludeAppUsers: i.excludeAppUsers && !(i.isEmergency || i.category === "emergency") });
     if (!s.recipients.length) return { error: "문자를 받을 수 있는 수신자가 없습니다. 연락처와 수신 동의 상태를 확인하세요." };
   }
 
@@ -135,6 +137,7 @@ export async function submitNoticeAction(raw: unknown): Promise<SubmitResult> {
     visibility: i.visibility,
     isEmergency,
     includeLink: i.includeLink,
+    excludeAppUsers: i.excludeAppUsers && !isEmergency,
     smsText: i.smsText.trim(),
     smsTextEdited: i.smsTextEdited,
     updatedAt: new Date(),

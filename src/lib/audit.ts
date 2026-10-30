@@ -19,6 +19,7 @@ export const AUDIT_LABELS: Record<string, string> = {
   "contact.activate": "연락처 다시 사용",
   "contact.reveal": "전화번호 전체 보기",
   "contact.import": "연락처 일괄 등록",
+  "contact.export": "연락처 백업 내려받기",
   "contact.sample_purge": "샘플 데이터 삭제",
   "notice.draft": "공지 임시 저장",
   "notice.send": "공지 즉시 발송",

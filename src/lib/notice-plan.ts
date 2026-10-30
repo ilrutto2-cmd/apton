@@ -19,6 +19,7 @@ export const noticeInputSchema = z.object({
   visibility: z.enum(["public", "private"]),
   includeLink: z.boolean(),
   isEmergency: z.boolean(),
+  excludeAppUsers: z.boolean().default(false),
   smsText: z.string().max(4000),
   smsTextEdited: z.boolean(),
   method: z.enum(["now", "schedule", "draft"]),

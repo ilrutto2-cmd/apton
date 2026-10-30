@@ -13,7 +13,7 @@ export default async function ResidentsPage({
 }: {
   searchParams: Promise<{ b?: string; q?: string; s?: string; page?: string }>;
 }) {
-  const { apartment } = await requireAdmin();
+  const { apartment, admin } = await requireAdmin();
   const sp = await searchParams;
   const aptId = apartment.id;
   const page = Math.max(1, Number(sp.page ?? 1) || 1);
@@ -54,6 +54,7 @@ export default async function ResidentsPage({
       active: contacts.active,
       reason: contacts.inactiveReason,
       isSample: contacts.isSample,
+      usesOtherApp: contacts.usesOtherApp,
       building: buildings.name,
       unitNo: units.unitNo,
     })
@@ -80,7 +81,14 @@ export default async function ResidentsPage({
           <h1 className="text-2xl font-bold">입주민 연락처</h1>
           <p className="text-sub">수신 동의가 확인된 연락처에만 문자가 발송됩니다. 번호는 암호화되어 저장되고 뒷자리만 표시됩니다.</p>
         </div>
-        <Link href="/residents/import" className="btn-secondary">📄 엑셀·CSV로 한 번에 등록</Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/residents/import" className="btn-secondary">📄 엑셀·CSV로 한 번에 등록</Link>
+          {admin.role === "owner" && (
+            <a href="/residents/export" className="btn-secondary" title="전체 전화번호가 담긴 파일입니다. 안전한 곳에 보관하세요. 내려받기는 이력에 남습니다.">
+              ⬇ 연락처 백업 내려받기
+            </a>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

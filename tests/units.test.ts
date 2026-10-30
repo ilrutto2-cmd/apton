@@ -44,7 +44,7 @@ describe("문자 본문 템플릿", () => {
 });
 
 describe("예약·재안내 계획", () => {
-  const base = { requestKey: "k".repeat(10), category: "elevator", title: "t", body: "", startDate: "", startTime: "", endDate: "", endTime: "", target: { type: "all" as const }, visibility: "public" as const, includeLink: false, isEmergency: false, smsText: "x", smsTextEdited: false, scheduleDate: "", scheduleTime: "", extraTimes: [] };
+  const base = { requestKey: "k".repeat(10), category: "elevator", title: "t", body: "", startDate: "", startTime: "", endDate: "", endTime: "", target: { type: "all" as const }, visibility: "public" as const, includeLink: false, excludeAppUsers: false, isEmergency: false, smsText: "x", smsTextEdited: false, scheduleDate: "", scheduleTime: "", extraTimes: [] };
   const now = kstToDate("2026-11-01", "12:00")!;
   it("3일 전·1일 전 오전 9시, 당일 오전 8시를 만들고 지난 시각은 건너뛴다", () => {
     const startsAt = kstToDate("2026-11-03", "10:00")!;
@@ -91,7 +91,7 @@ describe("일괄 등록 파일 해석", () => {
   it("엑셀이 저장한 CP949 CSV를 읽는다", async () => {
     const csv = "동,호수,전화번호,이름,수신동의\n101동,301,010-0000-1111,홍길동,예\n";
     const rows = await parseImportFile("a.csv", iconv.encode(csv, "cp949"));
-    expect(rows).toEqual([{ building: "101동", unit: "301", phone: "010-0000-1111", name: "홍길동", consent: "예", basis: "" }]);
+    expect(rows).toEqual([{ building: "101동", unit: "301", phone: "010-0000-1111", name: "홍길동", consent: "예", basis: "", otherApp: "" }]);
   });
   it("xlsx를 읽는다", async () => {
     const wb = new ExcelJS.Workbook();
@@ -100,7 +100,7 @@ describe("일괄 등록 파일 해석", () => {
     ws.addRow([101, 1203, "01000002222", "N"]);
     const buf = Buffer.from(await wb.xlsx.writeBuffer());
     const rows = await parseImportFile("a.xlsx", buf);
-    expect(rows).toEqual([{ building: "101", unit: "1203", phone: "01000002222", name: "", consent: "N", basis: "" }]);
+    expect(rows).toEqual([{ building: "101", unit: "1203", phone: "01000002222", name: "", consent: "N", basis: "", otherApp: "" }]);
   });
   it("필수 열이 없으면 이유를 알려준다", async () => {
     const r = await parseImportFile("a.csv", Buffer.from("이름,번호\n홍,1\n"));
@@ -119,5 +119,20 @@ describe("AI 지어내기 감지", () => {
     const today = kstToDate("2026-10-30", "09:00")!;
     expect(inventedNumbers("내일 101동 엘리베이터 오전 10시부터 오후 12시까지 점검", "10월 31일 101동 오전 10시~오후 12시 점검", today)).toEqual([]);
     expect(inventedNumbers("101동 단수", "101동 단수, 오후 5시 복구 예정", today)).toEqual(["5"]);
+  });
+});
+
+describe("단문으로 줄이기", () => {
+  it("90바이트 안에 들어가고, 가능하면 연도를 넣는다", async () => {
+    const { buildShortSms } = await import("@/lib/notice-templates");
+    const r = buildShortSms(
+      { apartmentName: "홍제원현대아파트", officePhone: "", isEmergency: false, title: "x", body: "", startsAt: kstToDate("2026-11-02", "10:00"), endsAt: kstToDate("2026-11-02", "13:00"), targetLabel: "101동", categoryTitle: "엘리베이터 정기 점검 안내" },
+      90,
+      smsBytes,
+    );
+    expect(r).not.toBeNull();
+    expect(smsBytes(r!)).toBeLessThanOrEqual(90);
+    expect(r).toContain("10:00~13:00");
+    expect(r).toContain("101동");
   });
 });

@@ -22,6 +22,7 @@ export async function addContactAction(_: ActionResult, fd: FormData): Promise<A
     name: String(fd.get("name") ?? ""),
     consentStatus: String(fd.get("consentStatus") ?? ""),
     consentBasis: String(fd.get("consentBasis") ?? ""),
+    usesOtherApp: fd.get("usesOtherApp") === "on",
   });
   if (!r.ok) return { error: r.error };
   await audit(ctx, "contact.create", { targetType: "contact", targetId: r.id, ip: await clientIp() });
@@ -44,6 +45,7 @@ export async function updateContactAction(_: ActionResult, fd: FormData): Promis
     name: String(fd.get("name") ?? "").trim().slice(0, 40),
     consentStatus: consent,
     consentBasis: consent === "agreed" ? String(fd.get("consentBasis") ?? "").trim().slice(0, 60) : "",
+    usesOtherApp: fd.get("usesOtherApp") === "on",
     updatedAt: new Date(),
   };
   if (consent === "agreed" && c.consentStatus !== "agreed") set.consentAt = new Date();

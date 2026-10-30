@@ -133,6 +133,8 @@ export const contacts = pgTable(
     consentAt: timestamp("consent_at", { withTimezone: true }),
     active: boolean("active").notNull().default(true),
     inactiveReason: text("inactive_reason"),
+    /** 아파트아이 등 다른 아파트 앱으로 공지를 받는 세대 — '다른 앱 사용 세대 제외' 공지에서 빠짐 */
+    usesOtherApp: boolean("uses_other_app").notNull().default(false),
     /** 샘플(체험용) 데이터 표시. 실제 발송 대상에서 항상 제외 */
     isSample: boolean("is_sample").notNull().default(false),
     createdAt: createdAt(),
@@ -168,6 +170,8 @@ export const notices = pgTable(
     visibility: text("visibility").notNull().default("public"),
     isEmergency: boolean("is_emergency").notNull().default(false),
     includeLink: boolean("include_link").notNull().default(false),
+    /** 다른 아파트 앱을 쓰는 세대는 빼고 보내기(긴급 공지는 항상 전체) */
+    excludeAppUsers: boolean("exclude_app_users").notNull().default(false),
     /** 문자 본문(링크 제외). 관리자가 최종 확인한 내용 */
     smsText: text("sms_text").notNull(),
     smsTextEdited: boolean("sms_text_edited").notNull().default(false),

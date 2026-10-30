@@ -277,3 +277,26 @@ describe("수신 자격과 안전장치", () => {
     expect(rec.sent[0].text.length).toBe(rec.sent[1].text.length);
   });
 });
+
+describe("다른 앱 사용 세대 제외", () => {
+  it("일반 공지에서는 빠지고, 긴급 공지와 옵션을 끈 공지에서는 받는다", async () => {
+    const { contacts } = await import("@/db/schema");
+    const [c] = await db.select().from(contacts).where(and(eq(contacts.apartmentId, A.apt.id), eq(contacts.phoneLast4, "0003")));
+    await db.update(contacts).set({ usesOtherApp: true }).where(eq(contacts.id, c.id));
+    const t = { type: "buildings" as const, buildingIds: [A.bs["101동"].id] };
+    const ex = await resolveRecipients(A.apt.id, t, { includeSample: false, excludeAppUsers: true });
+    expect(ex.recipients.length).toBe(2);
+    expect(ex.excludedAppUsers).toBe(1);
+    const all = await resolveRecipients(A.apt.id, t, { includeSample: false, excludeAppUsers: false });
+    expect(all.recipients.length).toBe(3);
+    // 발송 엔진: 긴급 공지면 옵션이 켜져 있어도 전체 발송
+    const { notice, dispatch } = await makeNotice(A.apt.id, t);
+    await db.update(notices).set({ excludeAppUsers: true, isEmergency: true }).where(eq(notices.id, notice.id));
+    await runDispatchNow(dispatch.id);
+    expect((await deliveriesOf(dispatch.id)).length).toBe(3);
+    const second = await makeNotice(A.apt.id, t);
+    await db.update(notices).set({ excludeAppUsers: true }).where(eq(notices.id, second.notice.id));
+    await runDispatchNow(second.dispatch.id);
+    expect((await deliveriesOf(second.dispatch.id)).length).toBe(2);
+  });
+});

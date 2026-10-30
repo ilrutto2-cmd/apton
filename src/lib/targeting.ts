@@ -17,6 +17,8 @@ export type RecipientSummary = {
   excludedNoConsent: number;
   excludedInactive: number;
   excludedSample: number;
+  /** 다른 앱 사용 세대라 이번 공지에서 뺀 수 */
+  excludedAppUsers: number;
   /** 같은 번호가 여러 세대에 등록돼 한 번만 보내는 건수 */
   duplicatesMerged: number;
   unitCount: number;
@@ -80,7 +82,7 @@ export async function targetLabel(apartmentId: string, t: NoticeTarget): Promise
 export async function resolveRecipients(
   apartmentId: string,
   target: NoticeTarget,
-  opts: { includeSample: boolean; onlyPhoneHashes?: string[] | null },
+  opts: { includeSample: boolean; onlyPhoneHashes?: string[] | null; excludeAppUsers?: boolean },
 ): Promise<RecipientSummary> {
   const conds = [eq(contacts.apartmentId, apartmentId)];
   if (target.type === "buildings") conds.push(inArray(units.buildingId, target.buildingIds.length ? target.buildingIds : ["00000000-0000-0000-0000-000000000000"]));
@@ -98,6 +100,7 @@ export async function resolveRecipients(
       active: contacts.active,
       consent: contacts.consentStatus,
       isSample: contacts.isSample,
+      usesOtherApp: contacts.usesOtherApp,
       b: buildings.name,
       u: units.unitNo,
     })
@@ -116,6 +119,7 @@ export async function resolveRecipients(
     excludedNoConsent: 0,
     excludedInactive: 0,
     excludedSample: 0,
+    excludedAppUsers: 0,
     duplicatesMerged: 0,
     unitCount: 0,
   };
@@ -128,6 +132,10 @@ export async function resolveRecipients(
     }
     if (r.consent !== "agreed") {
       s.excludedNoConsent++;
+      continue;
+    }
+    if (opts.excludeAppUsers && r.usesOtherApp) {
+      s.excludedAppUsers++;
       continue;
     }
     if (r.isSample && !opts.includeSample) {

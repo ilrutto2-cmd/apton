@@ -47,6 +47,7 @@ export default async function NewNoticePage({
       target: n.target,
       visibility: n.visibility as "public" | "private",
       includeLink: n.includeLink,
+      excludeAppUsers: n.excludeAppUsers,
       isEmergency: n.isEmergency,
       smsText: n.smsText,
       smsTextEdited: n.smsTextEdited,

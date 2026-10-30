@@ -93,11 +93,24 @@ export function AddContactPanel({ buildings, units }: { buildings: B[]; units: U
             </div>
           </div>
           <ConsentFields idPrefix="add" />
+          <AppUserField idPrefix="add" />
           <p className="hint">한 세대에 여러 번호를 등록할 수 있습니다. 같은 번호가 여러 세대에 있어도 한 공지는 한 번만 발송됩니다.</p>
           <SubmitButton pendingText="등록 중…">등록</SubmitButton>
         </ActionForm>
       )}
     </div>
+  );
+}
+
+function AppUserField({ idPrefix, defaultChecked = false }: { idPrefix: string; defaultChecked?: boolean }) {
+  return (
+    <label htmlFor={`${idPrefix}-app`} className="flex items-start gap-3 rounded-xl bg-slate-50 p-3">
+      <input id={`${idPrefix}-app`} type="checkbox" name="usesOtherApp" defaultChecked={defaultChecked} className="mt-1 h-5 w-5 accent-brand-500" />
+      <span>
+        <b>다른 아파트 앱으로 공지를 받는 세대</b>
+        <span className="block text-sm text-sub">아파트아이 등 다른 앱을 쓰는 세대입니다. &lsquo;다른 앱 사용 세대 제외&rsquo;로 보내는 공지에서 빠지며, 긴급 공지는 항상 받습니다.</span>
+      </span>
+    </label>
   );
 }
 
@@ -110,6 +123,7 @@ type Row = {
   active: boolean;
   reason: string | null;
   isSample: boolean;
+  usesOtherApp: boolean;
   building: string;
   unitNo: string;
 };
@@ -157,6 +171,7 @@ function ContactRow({ r }: { r: Row }) {
         <td className="whitespace-nowrap font-semibold">
           {r.building} {r.unitNo}호
           {r.isSample && <span className="badge ml-1.5 bg-violet-100 text-violet-700">샘플</span>}
+          {r.usesOtherApp && <span className="badge ml-1.5 bg-sky-50 text-sky-800">다른 앱 사용</span>}
         </td>
         <td>{r.name || <span className="text-slate-400">-</span>}</td>
         <td className="whitespace-nowrap font-mono text-[0.95rem]">
@@ -236,6 +251,7 @@ function ContactRow({ r }: { r: Row }) {
                   </div>
                 </div>
                 <ConsentFields idPrefix={`e-${r.id}`} defaultStatus={r.consent} defaultBasis={r.basis} />
+                <AppUserField idPrefix={`e-${r.id}`} defaultChecked={r.usesOtherApp} />
                 <SubmitButton className="btn-primary btn-sm">저장</SubmitButton>
               </ActionForm>
             )}

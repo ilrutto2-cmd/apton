@@ -15,6 +15,7 @@ export type ContactInput = {
   consentStatus: string;
   consentBasis?: string;
   isSample?: boolean;
+  usesOtherApp?: boolean;
 };
 
 export type AddResult = { ok: true; id: string; warning?: string } | { ok: false; error: string };
@@ -53,6 +54,7 @@ export async function addContact(apartmentId: string, i: ContactInput): Promise<
       consentBasis: i.consentStatus === "agreed" ? (i.consentBasis ?? "").trim().slice(0, 60) : "",
       consentAt: i.consentStatus === "agreed" ? new Date() : null,
       isSample: !!i.isSample,
+      usesOtherApp: !!i.usesOtherApp,
     })
     .returning({ id: contacts.id });
   return {
@@ -62,7 +64,7 @@ export async function addContact(apartmentId: string, i: ContactInput): Promise<
   };
 }
 
-export type ImportRow = { building: string; unit: string; phone: string; name?: string; consent?: string; basis?: string };
+export type ImportRow = { building: string; unit: string; phone: string; name?: string; consent?: string; basis?: string; otherApp?: string };
 export type ImportReport = {
   added: number;
   duplicates: number;
@@ -140,6 +142,7 @@ export async function importContacts(
       name: r.name,
       consentStatus: consent,
       consentBasis: r.basis?.trim() || (consent === "agreed" ? opts.defaultBasis : ""),
+      usesOtherApp: parseConsent(r.otherApp) === "agreed",
     });
     if (!res.ok) {
       if (res.error.includes("이미 등록된")) rep.duplicates++;

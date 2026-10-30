@@ -106,3 +106,40 @@ export function buildSmsText(i: SmsTextInput): string {
   lines.push("", `문의: 관리사무소${i.officePhone ? ` ${i.officePhone}` : ""}`);
   return lines.join("\n");
 }
+
+/**
+ * 단문(SMS, 90바이트) 요금으로 보내기 위한 짧은 문자. 짧은 것부터가 아니라 읽기 쉬운 것부터 시도해
+ * 90바이트 안에 드는 첫 번째를 고른다. 어떤 방법으로도 안 되면 null.
+ */
+export function buildShortSms(i: SmsTextInput & { categoryTitle: string }, maxBytes = 90, bytes: (s: string) => number): string | null {
+  const s = i.startsAt;
+  const e = i.endsAt;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const kst = (d: Date) => new Date(d.getTime() + 9 * 3600000);
+  const WD = ["일", "월", "화", "수", "목", "금", "토"];
+  // 연도를 넣은 날짜(2026.11.2)를 먼저 시도하고, 길면 연도를 뺀 날짜(11/2)로
+  const whenFor = (withYear: boolean) => {
+    if (!s) return "";
+    const a = kst(s);
+    const day = withYear ? `${a.getUTCFullYear()}.${a.getUTCMonth() + 1}.${a.getUTCDate()}` : `${a.getUTCMonth() + 1}/${a.getUTCDate()}`;
+    let w = `${day}(${WD[a.getUTCDay()]}) ${pad(a.getUTCHours())}:${pad(a.getUTCMinutes())}`;
+    if (e) {
+      const b = kst(e);
+      const sameDay = a.toISOString().slice(0, 10) === b.toISOString().slice(0, 10);
+      w += `~${sameDay ? "" : `${b.getUTCMonth() + 1}/${b.getUTCDate()} `}${pad(b.getUTCHours())}:${pad(b.getUTCMinutes())}`;
+    }
+    return w;
+  };
+  const head = i.isEmergency ? `[${i.apartmentName} 긴급]` : `[${i.apartmentName}]`;
+  const shortHead = i.isEmergency ? "[긴급안내]" : "[관리사무소]";
+  const title = i.categoryTitle.replace(/\s*안내$/, "");
+  const target = i.targetLabel && i.targetLabel !== "전체 세대" ? i.targetLabel : "";
+  const tel = i.officePhone ? ` 문의 ${i.officePhone}` : "";
+  const candidates: string[] = [];
+  for (const withYear of [true, false]) {
+    const when = whenFor(withYear);
+    const parts = (h: string, withTel: boolean) => [h, title, when, target].filter(Boolean).join(" ") + (withTel ? tel : "");
+    candidates.push(`${head} ${title}\n${[when, target].filter(Boolean).join(" ")}${tel}`, parts(head, true), parts(head, false), parts(shortHead, true), parts(shortHead, false));
+  }
+  return candidates.find((c) => bytes(c.trim()) <= maxBytes)?.trim() ?? null;
+}

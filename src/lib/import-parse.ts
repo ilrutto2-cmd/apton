@@ -10,6 +10,7 @@ const COLS: Record<keyof ImportRow, string[]> = {
   name: ["이름", "성명", "별칭", "이름(별칭)", "name"],
   consent: ["수신동의", "동의", "문자수신동의", "수신 동의", "consent"],
   basis: ["동의근거", "동의 근거", "동의방법", "basis"],
+  otherApp: ["앱사용", "다른앱사용", "아파트앱사용", "앱 사용", "otherapp"],
 };
 
 function mapHeader(header: string[]): Partial<Record<keyof ImportRow, number>> | string {
@@ -40,6 +41,7 @@ function toRows(table: string[][]): ImportRow[] | string {
     name: get(r, "name"),
     consent: get(r, "consent"),
     basis: get(r, "basis"),
+    otherApp: get(r, "otherApp"),
   }));
 }
 
@@ -87,4 +89,4 @@ export async function parseImportFile(name: string, buf: Buffer): Promise<Import
 }
 
 export const TEMPLATE_CSV =
-  "﻿동,호수,전화번호,이름(선택),수신동의,동의근거(선택)\n101동,301,010-0000-1111,입주민A,예,서면 동의서\n101동,301,010-0000-2222,입주민B,예,전화 확인\n102동,1203,010-0000-3333,,예,\n";
+  "﻿동,호수,전화번호,이름(선택),수신동의,동의근거(선택),앱사용(선택)\n101동,301,010-0000-1111,입주민A,예,서면 동의서,아니오\n101동,301,010-0000-2222,입주민B,예,전화 확인,예\n102동,1203,010-0000-3333,,예,,\n";

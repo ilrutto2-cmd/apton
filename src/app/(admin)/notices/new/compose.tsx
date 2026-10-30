@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "@/components/ui";
-import { buildSmsText, CATEGORIES, categoryOf } from "@/lib/notice-templates";
+import { buildShortSms, buildSmsText, CATEGORIES, categoryOf } from "@/lib/notice-templates";
+import { smsBytes } from "@/lib/sms/message";
 import { REMINDER_LABELS } from "@/lib/reminders";
 import { kstToDate, todayKst, fmtDateTime } from "@/lib/time";
 import { previewAction, submitNoticeAction, type Preview } from "../actions";
@@ -24,6 +25,7 @@ export type ComposeInitial = {
   target: NoticeTarget;
   visibility: "public" | "private";
   includeLink: boolean;
+  excludeAppUsers: boolean;
   isEmergency: boolean;
   smsText: string;
   smsTextEdited: boolean;
@@ -78,6 +80,8 @@ export function ComposeForm({
   const [target, setTarget] = useState<NoticeTarget>(initial?.target ?? { type: "all" });
   const [visibility, setVisibility] = useState<"public" | "private">(initial?.visibility ?? "public");
   const [includeLink, setIncludeLink] = useState(initial?.includeLink ?? apt.includeLinkDefault);
+  const [excludeAppUsers, setExcludeAppUsers] = useState(initial?.excludeAppUsers ?? false);
+  const [shortErr, setShortErr] = useState<string | null>(null);
   const isEmergency = category === "emergency";
   const [smsEdited, setSmsEdited] = useState(initial?.smsTextEdited ?? false);
   const [smsManual, setSmsManual] = useState(initial?.smsText ?? "");
@@ -149,6 +153,7 @@ export function ComposeForm({
     target,
     visibility,
     includeLink,
+    excludeAppUsers,
     isEmergency,
     smsText,
     smsTextEdited: smsEdited,
@@ -311,6 +316,17 @@ export function ComposeForm({
         {/* ⑤ 대상 */}
         <Section n={4} title="누구에게 보낼까요?">
           <TargetPicker buildings={buildings} units={units} target={target} setTarget={setTarget} />
+          {!isEmergency ? (
+            <label className="mt-3 flex items-start gap-3 rounded-xl bg-slate-50 p-3">
+              <input type="checkbox" className="mt-1 h-5 w-5 accent-brand-500" checked={excludeAppUsers} onChange={(e) => setExcludeAppUsers(e.target.checked)} />
+              <span>
+                <b>다른 아파트 앱 사용 세대는 빼고 보내기</b>
+                <span className="block text-sm text-sub">입주민 연락처에서 &lsquo;다른 앱 사용&rsquo;으로 표시한 세대에는 문자를 보내지 않아 요금을 줄입니다.</span>
+              </span>
+            </label>
+          ) : (
+            <p className="hint mt-3">긴급 공지는 다른 앱 사용 세대를 포함해 모든 대상에게 보냅니다.</p>
+          )}
         </Section>
 
         {/* 문자 내용 확인 */}
@@ -332,6 +348,27 @@ export function ComposeForm({
               ) : (
                 <span className="badge bg-brand-50 text-brand-700">자동 작성 중</span>
               )}
+              {smsBytes(smsText) > 90 && !includeLink && (
+                <button
+                  type="button"
+                  className="btn-secondary btn-sm"
+                  onClick={() => {
+                    const short = buildShortSms(
+                      { apartmentName: apt.name, officePhone: apt.officePhone, isEmergency, title, body, startsAt, endsAt, targetLabel: targetText, categoryTitle: categoryOf(category).title },
+                      90,
+                      smsBytes,
+                    );
+                    if (short) {
+                      setSmsManual(short);
+                      setSmsEdited(true);
+                      setShortErr(null);
+                    } else setShortErr("내용이 길어 단문(90바이트)으로 줄일 수 없습니다. 장문으로 보내거나 직접 줄여 주세요.");
+                  }}
+                >
+                  ✂ 단문으로 줄이기 (요금 약 60% 절약)
+                </button>
+              )}
+              {shortErr && <span className="text-sm text-red-700">{shortErr}</span>}
             </div>
             <label className="flex items-start gap-3 rounded-xl bg-slate-50 p-3">
               <input type="checkbox" className="mt-1 h-5 w-5 accent-brand-500" checked={includeLink} onChange={(e) => setIncludeLink(e.target.checked)} />
@@ -570,7 +607,7 @@ function PhonePreview({ text, type, bytes, emergency }: { text: string; type?: s
 function SummaryCard({ preview, error, mode }: { preview: Preview | null; error: string | null; mode: "test" | "live" }) {
   if (error) return <Alert>{error}</Alert>;
   if (!preview) return <div className="card p-4 text-sub">받는 사람을 계산하고 있습니다…</div>;
-  const ex = preview.excludedNoConsent + preview.excludedInactive + preview.excludedSample;
+  const ex = preview.excludedNoConsent + preview.excludedInactive + preview.excludedSample + preview.excludedAppUsers;
   return (
     <div className="card space-y-2 p-4 text-[0.95rem]">
       <div className="flex items-baseline justify-between">
@@ -586,6 +623,7 @@ function SummaryCard({ preview, error, mode }: { preview: Preview | null; error:
           {preview.excludedNoConsent > 0 && <li>· 수신 동의 미확인·거부 {preview.excludedNoConsent}명 제외</li>}
           {preview.excludedInactive > 0 && <li>· 전출 등 비활성 {preview.excludedInactive}명 제외</li>}
           {preview.excludedSample > 0 && <li>· 샘플 연락처 {preview.excludedSample}명 제외(실제 발송)</li>}
+          {preview.excludedAppUsers > 0 && <li>· 다른 앱 사용 {preview.excludedAppUsers}명 제외</li>}
           {preview.duplicatesMerged > 0 && <li>· 같은 번호 {preview.duplicatesMerged}건은 한 번만 발송</li>}
         </ul>
       )}
