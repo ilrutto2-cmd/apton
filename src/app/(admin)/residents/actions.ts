@@ -1,13 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, ne } from "drizzle-orm";
 import { db } from "@/db";
-import { contacts } from "@/db/schema";
+import { contacts, deliveries } from "@/db/schema";
 import { audit } from "@/lib/audit";
 import { clientIp, requireAdmin } from "@/lib/auth";
 import { addContact, CONSENT_LABELS, importContacts, otherUnitsWithPhone, type ImportReport } from "@/lib/contacts";
 import { decrypt, encrypt, phoneHash } from "@/lib/crypto";
+import { PURGED } from "@/lib/retention";
 import { parseImportFile } from "@/lib/import-parse";
 import { formatPhone, normalizeMobile } from "@/lib/phone";
 
@@ -88,7 +89,11 @@ export async function deleteContactAction(id: string): Promise<ActionResult> {
   const ctx = await requireAdmin();
   const c = await ownContact(ctx.apartment.id, id);
   if (!c) return { error: "연락처를 찾을 수 없습니다." };
-  // 발송 기록(deliveries)에는 암호화된 번호가 남는다 → 연결만 끊고 기록은 감사 목적으로 보존
+  // 삭제 요청: 과거 발송 기록의 전화번호도 지운다(뒷자리 4자리와 발송 결과만 남김)
+  await db
+    .update(deliveries)
+    .set({ phoneEnc: PURGED, viewToken: null })
+    .where(and(eq(deliveries.apartmentId, ctx.apartment.id), eq(deliveries.phoneHash, c.phoneHash), ne(deliveries.status, "pending")));
   await db.delete(contacts).where(eq(contacts.id, c.id));
   await audit(ctx, "contact.delete", { targetType: "contact", targetId: c.id, detail: { last4: c.phoneLast4 }, ip: await clientIp() });
   revalidatePath("/residents");

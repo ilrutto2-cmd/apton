@@ -53,13 +53,13 @@ export default async function Dashboard() {
         <Link href="/notices/new" className="group flex min-h-28 items-center justify-between gap-4 rounded-2xl bg-brand-500 p-6 text-white shadow-sm transition hover:bg-brand-600">
           <span>
             <span className="block text-2xl font-extrabold sm:text-3xl">＋ 새 공지 작성</span>
-            <span className="mt-1 block text-brand-100">점검·단수·정전 안내를 문자로 보내요</span>
+            <span className="mt-1 block text-white">점검·단수·정전 안내를 문자로 보내요</span>
           </span>
           <span className="text-4xl transition group-hover:translate-x-1" aria-hidden>→</span>
         </Link>
         <Link href="/notices/new?emergency=1" className="flex min-h-28 flex-col justify-center rounded-2xl border-2 border-red-200 bg-white p-5 text-red-600 transition hover:bg-red-50">
           <span className="text-xl font-extrabold">🚨 긴급 공지 발송</span>
-          <span className="mt-1 text-sm text-red-500">단수·정전 등 바로 알려야 할 때</span>
+          <span className="mt-1 text-sm text-red-700">단수·정전 등 바로 알려야 할 때</span>
         </Link>
       </div>
 

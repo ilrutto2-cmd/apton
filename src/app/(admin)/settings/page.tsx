@@ -97,9 +97,14 @@ export default async function SettingsPage() {
           <li>아파트별로 데이터가 분리되어 다른 아파트 관리자는 이 아파트의 연락처와 공지를 볼 수 없습니다.</li>
           <li>관리사무소(관리주체)가 개인정보 처리자입니다. 연락처 수집·이용 동의 등 개인정보 보호법상 근거를 갖추고, 처리방침을 입주민에게 공개해야 합니다.</li>
           <li>아파트온은 관리 목적의 <b>정보성 안내</b>만 보냅니다. 광고성 문자는 정보통신망법상 사전 동의, (광고) 표기, 무료 수신거부 등이 필요하므로 보내지 마세요.</li>
-          <li>전출 세대 연락처는 &lsquo;전출 처리&rsquo;로 발송을 막고, 보관 필요가 없어지면 삭제하세요.</li>
+          <li>전출 세대 연락처는 &lsquo;전출 처리&rsquo;로 발송을 막고, 보관 필요가 없어지면 삭제하세요. 삭제하면 과거 발송 기록의 전화번호도 함께 지워집니다(뒷자리만 남음).</li>
+          <li>발송 기록의 전화번호는 1년이 지나면 자동으로 지워집니다.</li>
+          <li>입주민 공지 페이지 아래에 관리사무소 정보, 처리방침, 수신 중단·삭제 요청 방법이 표시됩니다.</li>
         </ul>
-        <Link href="/privacy" className="btn-ghost btn-sm" target="_blank">개인정보 처리방침 예시 보기 ↗</Link>
+        <div className="flex flex-wrap gap-1">
+          <Link href={`/n/${apartment.publicSlug}/privacy`} className="btn-ghost btn-sm" target="_blank">우리 아파트 개인정보 처리방침 ↗</Link>
+          <Link href="/terms" className="btn-ghost btn-sm" target="_blank">이용약관 ↗</Link>
+        </div>
         <p className="text-xs text-sub">입주민 공지 페이지 주소: {appUrl()}/n/{apartment.publicSlug}</p>
       </section>
     </div>

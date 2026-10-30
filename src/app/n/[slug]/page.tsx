@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { aptBySlug, publicNotices } from "@/lib/public-notices";
 import { categoryOf } from "@/lib/notice-templates";
+import { ResidentFooter } from "@/components/policy";
 import { fmtDateTime, fmtSchedule, startOfKstDay } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
@@ -77,6 +78,7 @@ export default async function ResidentHome({ params }: { params: Promise<{ slug:
         )}
       </section>
       <p className="mt-8 text-center text-xs text-sub">이 페이지에는 단지 전체에 공개되는 공지만 표시됩니다. 세대별 안내는 문자로 받은 개인 링크에서 확인하세요.</p>
+      <ResidentFooter apt={apt} />
     </main>
   );
 }

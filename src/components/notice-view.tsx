@@ -16,8 +16,8 @@ export function NoticeView({
   const c = categoryOf(n.category);
   return (
     <article className="card overflow-hidden">
-      <div className={`px-5 py-4 ${n.isEmergency ? "bg-red-600 text-white" : "bg-brand-500 text-white"}`}>
-        <div className="text-sm opacity-90">{aptName} {n.isEmergency ? "긴급안내" : "관리사무소"}</div>
+      <div className={`px-5 py-4 ${n.isEmergency ? "bg-red-700 text-white" : "bg-brand-700 text-white"}`}>
+        <div className="text-sm">{aptName} {n.isEmergency ? "긴급안내" : "관리사무소"}</div>
         <h1 className="mt-0.5 text-[1.35rem] leading-snug font-extrabold">{n.title}</h1>
       </div>
       <dl className="grid grid-cols-[4.5rem_1fr] gap-y-2 border-b border-line px-5 py-4 text-[1.02rem]">

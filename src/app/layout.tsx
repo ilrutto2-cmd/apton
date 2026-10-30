@@ -12,15 +12,10 @@ export const viewport: Viewport = {
   themeColor: "#2f6fed",
 };
 
+// 외부 글꼴·분석 도구를 불러오지 않는다(입주민 접속 정보가 제3자에게 전달되지 않도록). 글꼴은 기기 기본 한글 글꼴을 쓴다.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
-        />
-      </head>
       <body className="min-h-dvh antialiased">{children}</body>
     </html>
   );

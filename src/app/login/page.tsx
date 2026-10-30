@@ -37,6 +37,9 @@ export default async function LoginPage() {
       <p className="mt-6 text-center text-sm text-sub">
         입주민이신가요? 문자에 있는 링크로 공지를 확인하세요. 별도 가입이 필요 없습니다.
       </p>
+      <p className="mt-3 text-center text-sm text-sub">
+        <Link href="/terms" className="underline">이용약관</Link> · <Link href="/privacy" className="underline">개인정보 처리방침</Link> · 비상업 서비스(이용료 없음)
+      </p>
     </main>
   );
 }

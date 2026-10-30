@@ -637,6 +637,15 @@ function ActionButtons({ busy, method, emergency, onConfirm, onDraft, compact }:
 function ConfirmDialog({ preview, title, method, busy, onCancel, onSend }: { preview: Preview; title: string; method: string; busy: boolean; onCancel: () => void; onSend: () => void }) {
   const live = preview.mode === "live";
   const [checked, setChecked] = useState(!live);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    cancelRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !busy) onCancel();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [busy, onCancel]);
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
       <div className="max-h-[92dvh] w-full max-w-lg overflow-auto rounded-t-2xl bg-white p-5 shadow-xl sm:rounded-2xl">
@@ -687,7 +696,7 @@ function ConfirmDialog({ preview, title, method, busy, onCancel, onSend }: { pre
           </label>
         )}
         <div className="mt-5 flex gap-2">
-          <button type="button" className="btn-secondary flex-1" onClick={onCancel} disabled={busy}>돌아가서 고치기</button>
+          <button ref={cancelRef} type="button" className="btn-secondary flex-1" onClick={onCancel} disabled={busy}>돌아가서 고치기</button>
           <button type="button" className="btn-primary flex-[1.4] text-lg" onClick={onSend} disabled={busy || !checked}>
             {busy ? "처리 중…" : method === "schedule" ? "예약하기" : live ? "발송하기" : "테스트 발송하기"}
           </button>

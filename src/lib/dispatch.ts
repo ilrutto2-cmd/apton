@@ -9,6 +9,7 @@ import { rateFor } from "./sms/pricing";
 import { SolapiProvider } from "./sms/solapi";
 import { resolveRecipients } from "./targeting";
 import { startOfKstDay } from "./time";
+import { purgeOldDeliveryPhones } from "./retention";
 
 // ───────── 문자 서비스 선택 ─────────
 
@@ -385,6 +386,7 @@ export async function recoverStuck(): Promise<number> {
 
 /** 크론/스케줄러가 주기적으로 부르는 한 번의 작업 */
 export async function tick() {
+  await purgeOldDeliveryPhones().catch((e) => console.error("[retention]", e));
   const recovered = await recoverStuck();
   const due = await processDueDispatches();
   const poll = await pollResults();

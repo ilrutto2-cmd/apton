@@ -57,7 +57,8 @@ export function SignupForm({ needCode }: { needCode: boolean }) {
         <input type="checkbox" name="agree" className="mt-1 h-5 w-5 accent-brand-500" required />
         <span>
           관리사무소는 입주민 연락처의 <b>개인정보 처리자</b>로서 수집·이용 근거(동의 등)를 갖추고, 아파트 관리 목적의 정보성 안내에만 사용합니다.{" "}
-          <Link href="/privacy" target="_blank" className="text-brand-600 underline">개인정보 처리 안내</Link>
+          <Link href="/terms" target="_blank" className="text-brand-600 underline">이용약관</Link>과{" "}
+          <Link href="/privacy" target="_blank" className="text-brand-600 underline">개인정보 처리방침</Link>을 확인했습니다.
         </span>
       </label>
       <SubmitButton className="btn-primary w-full" pendingText="등록 중…">등록하고 시작하기</SubmitButton>

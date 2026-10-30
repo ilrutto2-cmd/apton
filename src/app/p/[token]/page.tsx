@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { apartments, deliveries, dispatches, notices } from "@/db/schema";
 import { NoticeView } from "@/components/notice-view";
+import { ResidentFooter } from "@/components/policy";
 
 export const dynamic = "force-dynamic";
 export const metadata = { robots: { index: false, follow: false }, referrer: "no-referrer" };
@@ -33,6 +34,7 @@ export default async function PrivateNotice({ params }: { params: Promise<{ toke
       ) : (
         <NoticeView aptName={row.apt.name} officePhone={row.apt.officePhone} n={row.n} sentAt={row.dispatchStartedAt} />
       )}
+      <ResidentFooter apt={row.apt} />
     </main>
   );
 }

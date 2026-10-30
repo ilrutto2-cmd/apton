@@ -114,7 +114,7 @@ export default async function CostsPage({ searchParams }: { searchParams: Promis
         <div className="card p-4">
           <div className="text-sm font-semibold text-sub">단문 : 장문</div>
           <div className="mt-1 text-2xl font-extrabold">{sum.liveSms} : {sum.liveLms}</div>
-          <div className="mt-1.5 flex h-2.5 overflow-hidden rounded-full bg-brand-100" aria-label={`SMS ${smsPct}%`}>
+          <div className="mt-1.5 flex h-2.5 overflow-hidden rounded-full bg-brand-100" role="img" aria-label={`SMS ${smsPct}%`}>
             <div className="bg-emerald-500" style={{ width: `${smsPct}%` }} />
           </div>
           <div className="text-xs text-sub">SMS {smsPct}% · LMS {sum.live ? 100 - smsPct : 0}%</div>
