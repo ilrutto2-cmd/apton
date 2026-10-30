@@ -2,7 +2,7 @@ import { and, asc, eq, gte, inArray, isNotNull, lt, or, sql as dsql } from "driz
 import { db, sql } from "@/db";
 import { apartments, deliveries, dispatches, notices, type Dispatch } from "@/db/schema";
 import { decrypt, randomToken } from "./crypto";
-import { detectType, LMS_MAX_BYTES, LMS_SUBJECT_MAX_BYTES, smsBytes, truncateBytes, withLink } from "./sms/message";
+import { detectType, lmsSubject, LMS_MAX_BYTES, LMS_SUBJECT_MAX_BYTES, smsBytes, truncateBytes, withLink } from "./sms/message";
 import { MockProvider } from "./sms/mock";
 import { mapStatusCode, type OutMessage, type SmsProvider } from "./sms/provider";
 import { rateFor } from "./sms/pricing";
@@ -186,7 +186,7 @@ async function runClaimedDispatch(dispatchId: string) {
   await sendPending(fresh, provider, {
     from: apt.senderNumber || "00000000",
     smsText: notice.smsText,
-    title: notice.title,
+    title: lmsSubject(apt.name, notice.isEmergency),
     includeLink: notice.includeLink,
     visibility: notice.visibility,
     slug: apt.publicSlug,
@@ -375,7 +375,7 @@ export async function recoverStuck(): Promise<number> {
       const provider = getProvider(full.mode);
       if (provider && notice && apt) {
         await db.update(dispatches).set({ startedAt: new Date() }).where(eq(dispatches.id, d.id));
-        await sendPending(full, provider, { from: apt.senderNumber || "00000000", smsText: notice.smsText, title: notice.title, includeLink: notice.includeLink, visibility: notice.visibility, slug: apt.publicSlug, noticeId: notice.id });
+        await sendPending(full, provider, { from: apt.senderNumber || "00000000", smsText: notice.smsText, title: lmsSubject(apt.name, notice.isEmergency), includeLink: notice.includeLink, visibility: notice.visibility, slug: apt.publicSlug, noticeId: notice.id });
         continue;
       }
     }

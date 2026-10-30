@@ -40,3 +40,8 @@ const AD_WORDS = ["할인", "이벤트", "분양", "특가", "광고", "홍보",
 export function adWordsIn(text: string): string[] {
   return AD_WORDS.filter((w) => text.includes(w));
 }
+
+/** 장문(LMS) 문자 제목: 본문 제목과 겹치지 않도록 보낸 곳을 적는다 */
+export function lmsSubject(apartmentName: string, isEmergency: boolean): string {
+  return truncateBytes(`${apartmentName} ${isEmergency ? "긴급안내" : "관리사무소"}`, LMS_SUBJECT_MAX_BYTES);
+}
