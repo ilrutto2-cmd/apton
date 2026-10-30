@@ -30,10 +30,10 @@ export function kstParts(d: Date) {
 
 const WD = ["일", "월", "화", "수", "목", "금", "토"];
 
-/** 11월 2일(월) */
-export function fmtDateKo(d: Date): string {
+/** 2026년 11월 2일(월) — 문자는 오래 남으므로 연도까지 적는다 */
+export function fmtDateKo(d: Date, withYear = true): string {
   const p = kstParts(d);
-  return `${p.month}월 ${p.day}일(${WD[p.weekday]})`;
+  return `${withYear ? `${p.year}년 ` : ""}${p.month}월 ${p.day}일(${WD[p.weekday]})`;
 }
 
 /** 오전 10시 / 오후 1시 30분 */
@@ -61,7 +61,7 @@ export function fmtSchedule(start: Date | null, end: Date | null): { date: strin
   const e = kstParts(end);
   const sameDay = s.year === e.year && s.month === e.month && s.day === e.day;
   if (sameDay) return { date: fmtDateKo(start), time: `${fmtTimeKo(start)} ~ ${fmtTimeKo(end)}` };
-  return { date: `${fmtDateKo(start)} ${fmtTimeKo(start)} ~ ${fmtDateKo(end)} ${fmtTimeKo(end)}`, time: null };
+  return { date: `${fmtDateKo(start)} ${fmtTimeKo(start)} ~ ${fmtDateKo(end, s.year !== e.year)} ${fmtTimeKo(end)}`, time: null };
 }
 
 /** 이번 달 1일 0시(KST) */

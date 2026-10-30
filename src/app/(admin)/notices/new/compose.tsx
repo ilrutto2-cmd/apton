@@ -38,8 +38,8 @@ function newKey() {
 
 function shortDate(date: string): string {
   if (!date) return "";
-  const [, m, d] = date.split("-").map(Number);
-  return `${m}월 ${d}일`;
+  const [y, m, d] = date.split("-").map(Number);
+  return `${y}년 ${m}월 ${d}일`;
 }
 
 function won(n: number) {
@@ -337,7 +337,7 @@ export function ComposeForm({
               <input type="checkbox" className="mt-1 h-5 w-5 accent-brand-500" checked={includeLink} onChange={(e) => setIncludeLink(e.target.checked)} />
               <span>
                 <b>공지 확인 링크 넣기</b>
-                <span className="block text-sm text-sub">문자 끝에 상세 내용·이전 공지를 볼 수 있는 링크를 붙입니다. 링크를 넣으면 대부분 장문(LMS)이 됩니다.</span>
+                <span className="block text-sm text-sub">문자 끝에 상세 내용·이전 공지를 볼 수 있는 링크를 붙입니다. 문자 사기(스미싱) 걱정으로 링크를 누르지 않는 분이 많으니, 필요한 내용은 문자 본문에 모두 적고 링크는 꼭 필요할 때만 넣으세요. 링크를 넣으면 대부분 장문(LMS)이 됩니다.</span>
               </span>
             </label>
             <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="공개 범위">
